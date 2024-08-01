@@ -1,5 +1,3 @@
-import os
-import time
 import uuid
 import redis
 from flask import Flask, request, jsonify
@@ -11,9 +9,10 @@ api = Api(app)
 
 # Initialize Redis client
 redis_client = redis.Redis(
-    host=settings.redis_config.get("redis_host", ""),
-    port=int(settings.redis_config.get("redis_port", "")), 
-    db=0
+    host=settings.redis_config.get("host", ""),
+    port=int(settings.redis_config.get("port", "")), 
+    db=0,
+    decode_responses=True
 )
 
 # Mock data for theaters and seats
@@ -25,7 +24,7 @@ class TheaterSeats(Resource):
     def get(self, theater_id):
         if theater_id not in theaters:
             return {"error": "Theater not found"}, 404
-
+        breakpoint()
         # Check cache first
         cached_seats = redis_client.get(f"theater:{theater_id}:seats")
         if cached_seats:
@@ -99,6 +98,6 @@ class ReserveSeat(Resource):
             "expires_in": RESERVATION_EXPIRY
         }, 201
 
-api.add_resource(TheaterSeats, 'v1/theaters/<int:theater_id>/seats')
-api.add_resource(BookSeat, 'v1/theaters/<int:theater_id>/book')
-api.add_resource(ReserveSeat, 'v1/theaters/<int:theater_id>/reserve')
+api.add_resource(TheaterSeats, '/v1/theaters/<int:theater_id>/seats')
+api.add_resource(BookSeat, '/v1/theaters/<int:theater_id>/book')
+api.add_resource(ReserveSeat, '/v1/theaters/<int:theater_id>/reserve')
